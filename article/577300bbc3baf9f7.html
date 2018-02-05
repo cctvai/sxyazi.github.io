@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>线性表部分代码实现</title>
+</head>
+<body>
+    <p>
+        创建时间：<time>2017-11-26 21:31:11</time>
+    </p>
+    <p>
+        最后修改：<time>2017-11-26 21:31:11</time>
+    </p>
+
+    <hr>
+    <pre id="article"># 线性表部分代码实现
+
+## 顺序表
+
+```c
+#include &lt;stdio.h&gt;
+#define true 1
+#define false 0
+#define bool int
+
+#define MAX_LENGTH 10
+
+typedef int Elem;
+
+typedef struct{
+    int length;
+    Elem *elem;
+} List;
+
+// 初始化
+bool ListInit(List *l) {
+    l-&gt;elem = (Elem *)malloc(MAX_LENGTH * sizeof(Elem));
+    if (!l-&gt;elem) {
+        return false;
+    }
+
+    l-&gt;length = 0;
+    return true;
+}
+
+// 插入元素
+bool ListInsert (List *l, int i, Elem e) {
+    if (l-&gt;length &gt;= MAX_LENGTH) {
+        return false;
+    }
+
+    if (i &lt; 1 || i &gt; l-&gt;length+1) {
+        return false;
+    }
+
+    for (int j=l-&gt;length; j&gt;=i; j--) {
+        l-&gt;elem[j] = l-&gt;elem[j-1];
+    }
+
+    l-&gt;length ++;
+    l-&gt;elem[i-1] = e;
+    return true;
+}
+
+// 删除元素
+bool ListDelete(List *l, int i, Elem *e) {
+    if (l-&gt;length &lt; 1) {
+        return false;
+    }
+
+    if (i &lt; 1 || i &gt; l-&gt;length) {
+        return false;
+    }
+
+    *e = l-&gt;elem[i - 1];
+
+    for (int j=i; j&lt;l-&gt;length; j++) {
+        l-&gt;elem[j-1] = l-&gt;elem[j];
+    }
+
+    l-&gt;length --;
+    return true;
+}
+
+int main() {
+    List l;
+    ListInit(&amp;l);
+
+    for (int i=1; i&lt;=10; i++) {
+        printf(&quot;%d\n&quot;, ListInsert(&amp;l, i, i));
+    }
+
+    Elem e;
+    ListDelete(&amp;l, 3, &amp;e);
+    printf(&quot;Deleted: %d\n&quot;, e);
+
+    ListInsert(&amp;l, 1, 99);
+
+    for (int i=0; i&lt;l.length; i++) {
+        printf(&quot;%d &quot;, l.elem[i]);
+    }
+
+    printf(&quot;\n&quot;);
+    return 0;
+}
+```
+
+
+
+## 链表
+
+### 单链表
+
+```c
+#include &lt;stdio.h&gt;
+#define true 1
+#define false 0
+#define bool int
+
+typedef int Elem;
+
+typedef struct {
+    Elem elem;
+    struct Node *next;
+} Node;
+
+// 头插法
+Node *CreateListHead(int n) {
+    Node *l = (Node *)malloc(sizeof(Node));
+    l-&gt;next = NULL;
+
+    Node *p;
+    for (int i=0; i&lt;n; i++) {
+        p = (Node *)malloc(sizeof(Node));
+        p-&gt;elem = i;
+        p-&gt;next = l-&gt;next;
+        l-&gt;next = p;
+    }
+
+    return l;
+}
+
+// 尾插法
+Node *CreateListTail(int n) {
+    Node *l = (Node *)malloc(sizeof(Node));
+
+    Node *p, *t = l;
+    for (int i=0; i&lt;n; i++) {
+        p = (Node *)malloc(sizeof(Node));
+        p-&gt;elem = i;
+        
+        t-&gt;next = p;
+        t = p;
+    }
+
+    t-&gt;next = NULL;
+    return l;
+}
+
+// 插入
+bool ListInsert(Node *l, int i, Elem e) {
+    int j = 1;
+
+    Node *n = l;
+    while (j &lt; i &amp;&amp; n-&gt;next) {
+        j ++;
+        n = n-&gt;next;
+    }
+
+    if (j &gt; i) {
+        return false;
+    }
+
+    Node *t = (Node *)malloc(sizeof(Node));
+    t-&gt;elem = e;
+    t-&gt;next = n-&gt;next;
+    n-&gt;next = t;
+
+    return true;
+}
+
+// 删除
+bool ListDelete(Node *l, int i, Elem *e) {
+    int j = 1;
+    
+    Node *n = l;
+    while (j &lt; i &amp;&amp; n-&gt;next) {
+        j ++;
+        n = n-&gt;next;
+    }
+    
+    if (j &gt; i) {
+        return false;
+    }
+
+    Node *t = n-&gt;next;
+    *e = t-&gt;elem;
+    n-&gt;next = t-&gt;next;
+
+    return true;
+}
+
+// 获取某个元素
+bool GetElem(Node *l, int i, Elem *e) {
+    int j = 1;
+
+    Node *n = l;
+    while (j &lt; i &amp;&amp; n-&gt;next) {
+        j ++;
+        n = n-&gt;next;
+    }
+
+    if (j &gt; i) {
+        return false;
+    }
+
+    *e = n-&gt;elem;
+    return true;
+}
+
+int main() {
+    Elem e;
+    Node *l = CreateListTail(10);
+
+    ListInsert(l, 5, 666);
+    ListDelete(l, 10, &amp;e);
+    printf(&quot;%d\n&quot;, e);
+
+    Node *p = l;
+    while (p-&gt;next) {
+        p = p-&gt;next;
+        printf(&quot;%d &quot;, p-&gt;elem);
+    }
+
+    GetElem(l, 3, &amp;e);
+    printf(&quot;\n%d&quot;, e);
+
+    printf(&quot;\n&quot;);
+    return 0;
+}
+```
+
+### 静态链表
+
+```c
+#include &lt;stdio.h&gt;
+
+#define true 1
+#define false 0
+#define bool int
+#define MAX_SIZE 10
+
+typedef int Elem;
+typedef struct {
+    int cur;
+    Elem data;
+} List[MAX_SIZE];
+
+// 分配
+int Malloc(List l) {
+    int k = l[0].cur;
+    if (k) {
+        l[0].cur = l[k].cur;
+    }
+
+    return k;
+}
+
+// 回收
+void Free(List l, int pos) {
+    l[pos].cur = l[0].cur;
+    l[0].cur = pos;
+}
+
+// 初始化
+void InitList(List l) {
+    for (int i=0; i&lt;MAX_SIZE - 1; i++) {
+        l[i].cur = i + 1;
+        l[i].data = 0;
+    }
+
+    l[MAX_SIZE - 1].cur = 0;
+}
+
+// 长度
+int ListLength(List l) {
+    int j = 0;
+    int i = l[0].cur;
+    while (i) {
+        i = l[i].cur;
+        j ++;
+    }
+
+    return j - 1;
+}
+
+// 插入
+bool ListInsert(List l, int pos, Elem elem) {
+    if (pos &lt; 1 || pos &gt; ListLength(l) + 1) {
+        return false;
+    }
+
+    int j = Malloc(l);
+    if (!j) {
+        return false;
+    }
+
+    l[j].data = elem;
+
+    int i = MAX_SIZE - 1;
+    for (int k=1; k&lt;pos; k++) {
+        i = l[i].cur;
+    }
+
+    l[j].cur = l[i].cur;
+    l[i].cur = j;
+    return true;
+}
+
+// 删除
+bool ListDelete(List l, int pos) {
+    if (pos &lt; 1 || pos &gt; ListLength(l)) {
+        return false;
+    }
+
+    int j = l[MAX_SIZE - 1].cur;
+    for (int i=1; i&lt;pos-1; i++) {
+        j = l[j].cur;
+    }
+
+    int k = l[j].cur;
+    l[j].cur = l[k].cur;
+    Free(l, k);
+
+    return true;
+}
+
+void ListTraverse(List l) {
+    int i = l[MAX_SIZE - 1].cur;
+
+    while (i) {
+        printf(&quot;%d: %d\n&quot;, i, l[i].data);
+        i = l[i].cur;
+    }
+}
+
+int main() {
+
+    List l;
+    InitList(l);
+
+    ListInsert(l, 1, 11);
+    ListInsert(l, 2, 3333);
+    ListInsert(l, 2, 222);
+
+    ListDelete(l, 2);
+
+    ListInsert(l, 3, 44444);
+
+    ListTraverse(l);
+    printf(&quot;\n&quot;);
+
+    for (int i=0; i&lt;MAX_SIZE; i++) {
+        printf(&quot;List[%d] { cur: %d \t data: %d }\n&quot;, i, l[i].cur, l[i].data);
+    }
+
+    return 0;
+}
+```
+
+### 单向循环链表
+
+```go
+#include &lt;stdio.h&gt;
+#define true 1
+#define false 0
+#define bool int
+
+typedef int Elem;
+
+typedef struct {
+    Elem elem;
+    struct Node *next;
+} Node;
+
+// 初始化
+void InitList(Node **l) {
+    *l = (Node *)malloc(sizeof(Node));
+    (*l)-&gt;next = *l;
+}
+
+// 插入
+bool ListInsert(Node *l, int i, Elem e) {
+    if (i&lt;1 || i &gt; ListLength(l)+1) {
+        return false;
+    }
+
+    Node *p = l;
+    for (int j=1; j&lt;i; j++) {
+        p = p-&gt;next;
+    }
+
+    Node *n = (Node *)malloc(sizeof(Node));
+    n-&gt;elem = e;
+    n-&gt;next = p-&gt;next;
+
+    p-&gt;next = n;
+    return true;
+}
+
+// 删除
+bool ListDelete(Node *l, int i) {
+    if (i&lt;1 || i&gt;ListLength(l)) {
+        return false;
+    }
+
+    Node *p = l;
+    for (int j=1; j&lt;i; j++) {
+        p = p-&gt;next;
+    }
+
+    Node *n = p-&gt;next;
+    p-&gt;next = n-&gt;next;
+    return true;
+}
+
+// 长度
+int ListLength(Node *l) {
+    int i = 0;
+    for (Node *p=l-&gt;next; p!=l; p=p-&gt;next) {
+        i ++;
+    }
+
+    return i;
+}
+
+int main() {
+    Node *l;
+
+    InitList(&amp;l);
+
+    ListInsert(l, 1, 222);
+    ListInsert(l, 1, 11);
+    ListInsert(l, 3, 3333);
+    ListDelete(l, 1);
+
+    for (Node *n=l-&gt;next; n!=l; n=n-&gt;next) {
+        printf(&quot;%d\n&quot;, n-&gt;elem);
+    }
+
+    printf(&quot;Length: %d\n&quot;, ListLength(l));
+}
+```
+
+</pre>
+</body>
+</html>
